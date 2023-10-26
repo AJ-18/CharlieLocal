@@ -23,15 +23,20 @@
 
 package charlie.sidebet.view;
 
+import charlie.audio.Effect;
+import charlie.audio.SoundFactory;
 import charlie.card.Hid;
 import charlie.plugin.ISideBetView;
+import charlie.sidebet.rule.SideBetRule;
 import charlie.view.AMoneyManager;
 
+import charlie.view.sprite.Chip;
 import charlie.view.sprite.ChipButton;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 
@@ -61,9 +66,15 @@ public class SideBetView implements ISideBetView {
     protected int amt = 0;
     protected AMoneyManager moneyManager;
 
+    // ArrayList to store chip instances
+    protected List<Chip> chips = new ArrayList<>();
+
     public SideBetView() {
         LOG.info("side bet view constructed");
     }
+
+    // Declare an instance of SideBetRule
+    private SideBetRule sideBetRule = new SideBetRule();
 
     /**
      * Sets the money manager.
@@ -90,12 +101,28 @@ public class SideBetView implements ISideBetView {
             if(button.isPressed(x, y)) {
                 amt += button.getAmt();
                 LOG.info("A. side bet amount "+button.getAmt()+" updated new amt = "+amt);
+
+                // Construct a Chip instance and add it to the chips ArrayList
+                Chip chip = new Chip(button.getImage(), x, y, button.getAmt());
+                chips.add(chip);
+
+
+                // Play the CHIPS_IN sound
+                SoundFactory.play(Effect.CHIPS_IN);
+
             }
         }
 
         if(oldAmt == amt) {
             amt = 0;
             LOG.info("B. side bet amount cleared");
+
+            // Clear the chips ArrayList
+            chips.clear();
+
+            // Play the CHIPS_OUT sound
+            SoundFactory.play(Effect.CHIPS_OUT);
+
         }
     }
 
@@ -147,7 +174,7 @@ public class SideBetView implements ISideBetView {
      */
     @Override
     public void render(Graphics2D g) {
-        // Draw the at-stake place on the table
+        // Draw the at-stake place on the table (Render the at stake area)
         g.setColor(Color.RED);
         g.setStroke(dashed);
         g.drawOval(X-DIAMETER/2, Y-DIAMETER/2, DIAMETER, DIAMETER);
@@ -155,6 +182,49 @@ public class SideBetView implements ISideBetView {
         // Draw the at-stake amount
         g.setFont(font);
         g.setColor(Color.WHITE);
+        String amtText = "" + amt;
+        int textWidth = g.getFontMetrics().stringWidth(amtText);
         g.drawString(""+amt, X-5, Y+5);
+
+        // Render side bet descriptions to the right of the at-stake region
+        g.setFont(font);
+        g.setColor(Color.YELLOW);
+        g.drawString("SUPER 7 pays 3:1", X + DIAMETER, Y - 40);
+        g.drawString("ROYAL MATCH pays 25:1", X + DIAMETER, Y);
+        g.drawString("EXACTLY 13 pays 1:1", X + DIAMETER, Y + 40);
+
+//        // Draw the chips on the table
+//        for (Chip chip : chips) {
+//            g.drawImage(chip.getImage(), chip.getX(), chip.getY(), null);
+//        }
+
+        // Simulate chips being placed on the table to the right of the at-stake area
+        for (Chip chip : chips) {
+            // Simulate random chip placement by adding an offset to X and Y positions
+            int xOffset = (int) (Math.random() * 20 - 10);
+            int yOffset = (int) (Math.random() * 20 - 10);
+            g.drawImage(chip.getImage(), chip.getX() + xOffset, chip.getY() + yOffset, null);
+        }
+
+        // Check the side bet outcome using the SideBetRule
+        //double sideBetOutcome = sideBetRule.apply(getHand()); // Use the apply method to check the side bet outcome
+        boolean sideBetOutcome = false;
+
+        if(sideBetRule.Super7 == true || sideBetRule.RoyalMatched == true || sideBetRule.Exactly13 == true ) {
+            sideBetOutcome = true;
+        }
+
+        // Render "WIN" or "LOSE" over the at-stake chips based on the outcome
+        if (sideBetOutcome == true) {
+            g.setFont(font);
+            // Color for a win
+            g.setColor(Color.GREEN);
+            g.drawString("WIN", X + DIAMETER + 150, Y + 10);
+        } else if (sideBetOutcome == false) {
+            g.setFont(font);
+            // Color for a lose
+            g.setColor(Color.RED);
+            g.drawString("LOSE", X + DIAMETER + 150, Y + 10);
+        }
     }
 }

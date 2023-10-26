@@ -38,8 +38,12 @@ public class SideBetRule implements ISideBetRule {
     private final Double PAYOFF_SUPER7 = 3.0;
     private final Double PAYOFF_ROYAL_MATCH = 25.0;
     private final Double PAYOFF_EXACTLY_13 = 1.0;
+    public boolean Super7 = false;
+    public boolean RoyalMatched = false;
+    public boolean Exactly13 = false;
 //    private boolean pushOccurred = false; // Flag to track if a push has occurred
 //    private Double carryOverBet = 0.0; // Variable to store the carried over bet
+
     /**
      * Apply rule to the hand and return the payout if the rule matches
      * and the negative bet if the rule does not match.
@@ -71,18 +75,21 @@ public class SideBetRule implements ISideBetRule {
 
         if (card.getRank() == 7) {
             LOG.info("side bet SUPER 7 matches");
+            Super7 = true;
             return bet * PAYOFF_SUPER7;
         }
 
         // Check for the suited Royal Match
         if (isSuitedRoyalMatch(hand)) {
             LOG.info("side bet SUITED ROYAL MATCH matches");
+            RoyalMatched = true;
             return bet * PAYOFF_ROYAL_MATCH;
         }
 
         // Check for Exactly 13
         if (isExactly13(hand)) {
             LOG.info("side bet EXACTLY 13 matches");
+            Exactly13 = true;
             return bet * PAYOFF_EXACTLY_13;
         }
 
@@ -102,8 +109,15 @@ public class SideBetRule implements ISideBetRule {
             Card firstCard = hand.getCard(0);
             Card secondCard = hand.getCard(1);
 
+            if(firstCard.getSuit() == secondCard.getSuit()) {
+                if(firstCard.getRank() == Card.KING && secondCard.getRank() == Card.QUEEN ) {
+                    return true;
+                }
+                else if(firstCard.getRank() == Card.QUEEN && secondCard.getRank() == Card.KING ) {
+                    return true;
+                }
+            }
 
-            
 //            if (isRoyalCard(firstCard) && isRoyalCard(secondCard)) {
 //                return firstCard.getSuit() == secondCard.getSuit();
 //            }
