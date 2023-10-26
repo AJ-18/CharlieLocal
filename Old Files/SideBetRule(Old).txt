@@ -38,8 +38,9 @@ public class SideBetRule implements ISideBetRule {
     private final Double PAYOFF_SUPER7 = 3.0;
     private final Double PAYOFF_ROYAL_MATCH = 25.0;
     private final Double PAYOFF_EXACTLY_13 = 1.0;
-//    private boolean pushOccurred = false; // Flag to track if a push has occurred
-//    private Double carryOverBet = 0.0; // Variable to store the carried over bet
+
+    private boolean Push = false;
+
     /**
      * Apply rule to the hand and return the payout if the rule matches
      * and the negative bet if the rule does not match.
@@ -49,48 +50,63 @@ public class SideBetRule implements ISideBetRule {
     @Override
     public double apply(Hand hand) {
         Double bet = hand.getHid().getSideAmt();
-        LOG.info("side bet amount = " + bet);
+        LOG.info("side bet amount = "+bet);
 
-        if (bet == 0) {
+        if(bet == 0)
             return 0.0;
-        }
 
-        LOG.info("side bet rule applying hand = " + hand);
-
-//        // Calculate the sum of card ranks in the player's hand
-//        int cardRanksSum = calculateCardRanksSum(hand);
-//
-//        if (cardRanksSum == 19 && !pushOccurred) {
-//            LOG.info("Push: No side bet due to a card ranks sum of 19.");
-//            pushOccurred = true; // Mark that a push has occurred
-//            carryOverBet += bet; // Carry over the bet
-//            return 0.0;
-//        }
+        LOG.info("side bet rule applying hand = "+hand);
 
         Card card = hand.getCard(0);
 
-        if (card.getRank() == 7) {
-            LOG.info("side bet SUPER 7 matches");
-            return bet * PAYOFF_SUPER7;
+        int sumOfRanks = 0;
+        for (int i = 0; i < hand.size(); i++) {
+            card = hand.getCard(i);
+            sumOfRanks += card.getRank();
         }
 
-        // Check for the suited Royal Match
+        if (sumOfRanks == 13) {
+            LOG.info("Hand is a push, no side bet is applied.");
+            Push = true;
+            return 0.0;
+        }
+
+        double[] payouts = new double[3];
+        double highestPayout = 0.0;
+
         if (isSuitedRoyalMatch(hand)) {
-            LOG.info("side bet SUITED ROYAL MATCH matches");
-            return bet * PAYOFF_ROYAL_MATCH;
+            payouts[0] = bet * PAYOFF_ROYAL_MATCH;
+            LOG.info("Suited Royal Match matches. Payout: " + payouts[0]);
+            if (payouts[0] > highestPayout) {
+                highestPayout = payouts[0];
+            }
         }
 
-        // Check for Exactly 13
         if (isExactly13(hand)) {
-            LOG.info("side bet EXACTLY 13 matches");
-            return bet * PAYOFF_EXACTLY_13;
+            payouts[1] = bet * PAYOFF_EXACTLY_13;
+            LOG.info("Exactly 13 matches. Payout: " + payouts[1]);
+            if (payouts[1] > highestPayout) {
+                highestPayout = payouts[1];
+            }
         }
 
-        LOG.info("side bet rule no match");
+        if (isSuper7(hand)) {
+            payouts[2] = bet * PAYOFF_SUPER7;
+            LOG.info("Super 7 matches. Payout: " + payouts[2]);
+            if (payouts[2] > highestPayout ) {
+                highestPayout = payouts[2];
+            }
+        }
 
-        return -bet;
+        if (highestPayout == 0.0) {
+            LOG.info("No side bet matches.");
+        } else {
+            LOG.info("Side bet rule highest payout: " + highestPayout);
+        }
+
+        return highestPayout;
+        //return -bet;
     }
-
 
     /**
      * Checks if the hand has a Suited Royal Match.
@@ -102,11 +118,9 @@ public class SideBetRule implements ISideBetRule {
             Card firstCard = hand.getCard(0);
             Card secondCard = hand.getCard(1);
 
-
-            
-//            if (isRoyalCard(firstCard) && isRoyalCard(secondCard)) {
-//                return firstCard.getSuit() == secondCard.getSuit();
-//            }
+            if (isRoyalCard(firstCard) && isRoyalCard(secondCard)) {
+                return firstCard.getSuit() == secondCard.getSuit();
+            }
         }
 
         return false;
@@ -129,20 +143,26 @@ public class SideBetRule implements ISideBetRule {
     }
 
     /**
+     * Checks if the hand has a Super 7.
+     * @param hand Hand to check.
+     * @return True if Super 7, false otherwise.
+     */
+    private boolean isSuper7(Hand hand) {
+        if (hand.size() >= 1) {
+            Card firstCard = hand.getCard(0);
+            return (firstCard.getRank() == 7);
+        }
+
+        return false;
+    }
+
+    /**
      * Checks if a card is a King or Queen.
      * @param card Card to check.
      * @return True if the card is a King or Queen, false otherwise.
      */
-//    private boolean isRoyalCard(Card card) {
-//        return (card.getRank() == Card.KING || card.getRank() == Card.QUEEN);
-//    }
-
-    // Method to calculate the sum of card ranks in the hand
-//    private int calculateCardRanksSum(Hand hand) {
-//        int sum = 0;
-//        for (int i = 0; i < hand.size(); i++) {
-//            sum += hand.getCard(i).getRank();
-//        }
-//        return sum;
-//    }
+    private boolean isRoyalCard(Card card) {
+        return (card.getRank() == Card.KING || card.getRank() == Card.QUEEN);
+    }
 }
+
