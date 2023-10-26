@@ -68,6 +68,7 @@ public class SideBetView implements ISideBetView {
 
     // ArrayList to store chip instances
     protected List<Chip> chips = new ArrayList<>();
+    private String outcome = "";
 
     public SideBetView() {
         LOG.info("side bet view constructed");
@@ -102,8 +103,11 @@ public class SideBetView implements ISideBetView {
                 amt += button.getAmt();
                 LOG.info("A. side bet amount "+button.getAmt()+" updated new amt = "+amt);
 
+                // Increments x based on amount of chips
+                int xOffset = (int) (Math.random() * 20 + 10 * chips.size());
+                int yOffset = (int) (Math.random() * 20 - 10);
                 // Construct a Chip instance and add it to the chips ArrayList
-                Chip chip = new Chip(button.getImage(), x, y, button.getAmt());
+                Chip chip = new Chip(button.getImage(), X + xOffset, Y + yOffset, button.getAmt());
                 chips.add(chip);
 
 
@@ -141,6 +145,13 @@ public class SideBetView implements ISideBetView {
 
         // Update the bankroll
         moneyManager.increase(bet);
+        
+        if (bet < 0) {
+            this.outcome = "Lose";
+        }
+        else {
+            this.outcome = "Won";
+        }
 
         LOG.info("new bankroll = "+moneyManager.getBankroll());
     }
@@ -150,6 +161,8 @@ public class SideBetView implements ISideBetView {
      */
     @Override
     public void starting() {
+        // Clears outcome
+        outcome = "";
     }
 
     /**
@@ -193,34 +206,21 @@ public class SideBetView implements ISideBetView {
         g.drawString("ROYAL MATCH pays 25:1", X + DIAMETER, Y);
         g.drawString("EXACTLY 13 pays 1:1", X + DIAMETER, Y + 40);
 
-//        // Draw the chips on the table
-//        for (Chip chip : chips) {
-//            g.drawImage(chip.getImage(), chip.getX(), chip.getY(), null);
-//        }
-
         // Simulate chips being placed on the table to the right of the at-stake area
         for (Chip chip : chips) {
-            // Simulate random chip placement by adding an offset to X and Y positions
-            int xOffset = (int) (Math.random() * 20 - 10);
-            int yOffset = (int) (Math.random() * 20 - 10);
-            g.drawImage(chip.getImage(), chip.getX() + xOffset, chip.getY() + yOffset, null);
-        }
+            g.drawImage(chip.getImage(), chip.getX(), chip.getY(), null);
+       }
 
         // Check the side bet outcome using the SideBetRule
-        //double sideBetOutcome = sideBetRule.apply(getHand()); // Use the apply method to check the side bet outcome
-        boolean sideBetOutcome = false;
-
-        if(sideBetRule.Super7 == true || sideBetRule.RoyalMatched == true || sideBetRule.Exactly13 == true ) {
-            sideBetOutcome = true;
-        }
-
         // Render "WIN" or "LOSE" over the at-stake chips based on the outcome
-        if (sideBetOutcome == true) {
+        if (outcome == "Won") {
+            //Set color here
+            g.fillRoundRect(x, y-h+5, w, h, 5, 5);
             g.setFont(font);
             // Color for a win
             g.setColor(Color.GREEN);
             g.drawString("WIN", X + DIAMETER + 150, Y + 10);
-        } else if (sideBetOutcome == false) {
+        } else if (outcome == "Lose") {
             g.setFont(font);
             // Color for a lose
             g.setColor(Color.RED);

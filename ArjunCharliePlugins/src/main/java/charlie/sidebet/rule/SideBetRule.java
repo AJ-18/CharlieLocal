@@ -41,8 +41,6 @@ public class SideBetRule implements ISideBetRule {
     public boolean Super7 = false;
     public boolean RoyalMatched = false;
     public boolean Exactly13 = false;
-//    private boolean pushOccurred = false; // Flag to track if a push has occurred
-//    private Double carryOverBet = 0.0; // Variable to store the carried over bet
 
     /**
      * Apply rule to the hand and return the payout if the rule matches
@@ -60,16 +58,6 @@ public class SideBetRule implements ISideBetRule {
         }
 
         LOG.info("side bet rule applying hand = " + hand);
-
-//        // Calculate the sum of card ranks in the player's hand
-//        int cardRanksSum = calculateCardRanksSum(hand);
-//
-//        if (cardRanksSum == 19 && !pushOccurred) {
-//            LOG.info("Push: No side bet due to a card ranks sum of 19.");
-//            pushOccurred = true; // Mark that a push has occurred
-//            carryOverBet += bet; // Carry over the bet
-//            return 0.0;
-//        }
 
         Card card = hand.getCard(0);
 
@@ -117,10 +105,6 @@ public class SideBetRule implements ISideBetRule {
                     return true;
                 }
             }
-
-//            if (isRoyalCard(firstCard) && isRoyalCard(secondCard)) {
-//                return firstCard.getSuit() == secondCard.getSuit();
-//            }
         }
 
         return false;
@@ -142,21 +126,4 @@ public class SideBetRule implements ISideBetRule {
         return false;
     }
 
-    /**
-     * Checks if a card is a King or Queen.
-     * @param card Card to check.
-     * @return True if the card is a King or Queen, false otherwise.
-     */
-//    private boolean isRoyalCard(Card card) {
-//        return (card.getRank() == Card.KING || card.getRank() == Card.QUEEN);
-//    }
-
-    // Method to calculate the sum of card ranks in the hand
-//    private int calculateCardRanksSum(Hand hand) {
-//        int sum = 0;
-//        for (int i = 0; i < hand.size(); i++) {
-//            sum += hand.getCard(i).getRank();
-//        }
-//        return sum;
-//    }
 }
