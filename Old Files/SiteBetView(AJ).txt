@@ -28,13 +28,14 @@ import charlie.audio.SoundFactory;
 import charlie.card.Hid;
 import charlie.plugin.ISideBetView;
 import charlie.sidebet.rule.SideBetRule;
-import charlie.view.AHand;
 import charlie.view.AMoneyManager;
 
 import charlie.view.sprite.Chip;
 import charlie.view.sprite.ChipButton;
-
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -144,7 +145,7 @@ public class SideBetView implements ISideBetView {
 
         // Update the bankroll
         moneyManager.increase(bet);
-
+        
         if (bet < 0) {
             this.outcome = "Lose";
         }
@@ -209,44 +210,21 @@ public class SideBetView implements ISideBetView {
         for (Chip chip : chips) {
             g.drawImage(chip.getImage(), chip.getX(), chip.getY(), null);
        }
-        //Setting Font metrics and outcome font style
-        Font outcomeFont = new Font("Arial", Font.BOLD, 18);
-        FontMetrics fm = g.getFontMetrics(outcomeFont);
-        String outcomeText = "";
-        if(outcome == "Won" || outcome == "Lose")
-            outcomeText += " " + outcome.toString().toUpperCase() + " ! ";
+
         // Check the side bet outcome using the SideBetRule
         // Render "WIN" or "LOSE" over the at-stake chips based on the outcome
         if (outcome == "Won") {
-            //Create foreground and background color
-            Color winColorFg = Color.BLACK;
-            Color winColorBg = new Color(116,255,4);
-            //Set Font
-            //outcomeText = "WIN";
-            int w = fm.charsWidth(outcomeText.toCharArray(), 0, outcomeText.length());
-            int h = fm.getHeight();
+            //Set color here
+           // g.fillRoundRect(x, y-h+5, w, h, 5, 5);
+            g.setFont(font);
             // Color for a win
-            g.setColor(winColorBg);
-            g.fillRoundRect(X, Y-h+5, w, h, 5, 5);
-            g.setColor((winColorFg));
-            g.setFont(outcomeFont);
-            g.drawString(outcomeText, X, Y);
-            //g.drawString("WIN", X + DIAMETER + 150, Y + 10);
+            g.setColor(Color.GREEN);
+            g.drawString("WIN", X + DIAMETER + 150, Y + 10);
         } else if (outcome == "Lose") {
-            //Create foreground and background color
-            Color loseColorBg = new Color(250,58,5);
-            Color loseColorFg = Color.WHITE;
-            //Set Font
-            //outcomeText = "LOSE";
-            int w = fm.charsWidth(outcomeText.toCharArray(), 0, outcomeText.length());
-            int h = fm.getHeight();
+            g.setFont(font);
             // Color for a lose
-            g.setColor(loseColorBg);
-            g.fillRoundRect(X, Y-h+5, w, h, 5, 5);
-            g.setColor((loseColorFg));
-            g.setFont(outcomeFont);
-            g.drawString(outcomeText, X, Y);
-            //g.drawString("LOSE", X + DIAMETER + 150, Y + 10);
+            g.setColor(Color.RED);
+            g.drawString("LOSE", X + DIAMETER + 150, Y + 10);
         }
     }
 }
