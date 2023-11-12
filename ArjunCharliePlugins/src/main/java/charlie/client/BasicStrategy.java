@@ -180,39 +180,36 @@ public class BasicStrategy {
      * @param upCard Dealer's up-card
      */
     protected Play doSection3(Hand hand, Card upCard) {
-        // Find the non-Ace card
         Card nonAceCard = hand.getCard(0).getRank() == Card.ACE ? hand.getCard(1) : hand.getCard(0);
+        int nonAceRank = nonAceCard.getRank();
 
-        // Compute the row index based on the non-Ace card's rank.
-        // The array starts at A,2 hence we subtract 2 to align with the array index (A,2 would be at index 0).
-        int rowIndex = nonAceCard.getRank() - 2;
+        // Calculate rowIndex for non-Ace card. "A,10" is at index 0 and "A,2" is at index 8.
+        // We need to invert the order, so "A,2" corresponds to 0 and "A,10" to 8.
+        int rowIndex = 10 - nonAceRank;
 
-        // Check if the rowIndex is within the bounds of the section3Rules array
-        if(rowIndex < 0 || rowIndex >= section3Rules.length) {
+        // Bounds check for row index
+        if (rowIndex < 0 || rowIndex >= section3Rules.length) {
             return Play.NONE;
         }
 
-        // Retrieve the row from the section3Rules matrix
         Play[] row = section3Rules[rowIndex];
 
-        // Determine the column index based on the dealer's up-card
-        // Subtract 2 from the rank to align with the array index (2 would be at index 0).
-        int colIndex = upCard.getRank() - 2;
-
-        // Correct for face cards being treated as 10
-        if(upCard.isFace()) {
-            colIndex = 10 - 2; // Index 8 for face cards (T)
+        // Determine column index based on dealer's up-card
+        int colIndex;
+        if (upCard.isFace()) {
+            colIndex = 8; // Face cards (J, Q, K) are treated as 10
+        } else if (upCard.isAce()) {
+            colIndex = 9; // Ace is in the last column
+        } else {
+            colIndex = upCard.getRank() - 2; // For numerical cards
         }
 
-        // Correct for Ace being the last column
-        else if(upCard.isAce()) {
-            colIndex = 9; // Index 9 for Aces
+        // Bounds check for column index
+        if (colIndex < 0 || colIndex >= row.length) {
+            return Play.NONE;
         }
 
-        // Retrieve the play from the correct column in the retrieved row
-        Play play = row[colIndex];
-
-        return play;
+        return row[colIndex];
     }
 
     /**
@@ -224,49 +221,37 @@ public class BasicStrategy {
         // Since hand is a pair, we can just take the rank of the first card.
         int pairCardRank = hand.getCard(0).getRank();
 
+        // Determine the row index. The array starts with "10,10" at index 0 and ends with "A,A" at index 9.
         int rowIndex;
-
-        // Determine the row index based on the pair card's rank.
-        if(pairCardRank == Card.ACE) {
-            // A pair of Aces is at the end of the array (index 9).
-            rowIndex = 9;
+        if (pairCardRank == Card.ACE) {
+            rowIndex = 9; // "A,A" is at the last index (9).
         } else {
-            // The array starts at 10,10, so we subtract 2 to align with the array index (10,10 would be at index 0).
-            rowIndex = pairCardRank - 2;
+            rowIndex = 10 - pairCardRank; // Other pairs follow in descending order.
         }
 
-        // Check if the rowIndex is within the bounds of the section4Rules array
-        if(rowIndex < 0 || rowIndex >= section4Rules.length) {
+        // Bounds check for row index
+        if (rowIndex < 0 || rowIndex >= section4Rules.length) {
             return Play.NONE;
         }
 
-        // Retrieve the row from the section4Rules matrix
         Play[] row = section4Rules[rowIndex];
 
-        // Initialize colIndex to -1 to signify an invalid index.
+        // Determine column index based on dealer's up-card
         int colIndex;
-
-        // Determine the column index based on the dealer's up-card
-        if(upCard.isFace()) {
-            // Face cards (J, Q, K) are treated as 10 and have index 8.
-            colIndex = 10-2;
-        } else if(upCard.isAce()) {
-            // Ace is in the last column with index 9.
-            colIndex = 9;
+        if (upCard.isFace()) {
+            colIndex = 8; // Face cards (J, Q, K) are treated as 10.
+        } else if (upCard.isAce()) {
+            colIndex = 9; // Ace is in the last column.
         } else {
-            // For numerical cards, subtract 2 from the rank to align with the array index (2 would be at index 0).
-            colIndex = upCard.getRank() - 2;
+            colIndex = upCard.getRank() - 2; // For numerical cards.
         }
 
-        // Check if the colIndex is within the bounds of the row array
-        if(colIndex < 0 || colIndex >= row.length) {
+        // Bounds check for column index
+        if (colIndex < 0 || colIndex >= row.length) {
             return Play.NONE;
         }
 
-        // Retrieve the play from the correct column in the retrieved row
-        Play play = row[colIndex];
-
-        return play;
+        return row[colIndex];
     }
 
     protected boolean isValid(Hand hand,Card upCard) {

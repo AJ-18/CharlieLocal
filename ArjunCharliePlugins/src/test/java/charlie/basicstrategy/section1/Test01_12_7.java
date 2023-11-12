@@ -11,30 +11,31 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Tests my 12 vs dealer 2 which should be HIT.
+ * Tests my 17 vs dealer Ace which should be STAY.
  * @author AJ - Arjun Suresh
  */
-public class Test00_12_2 {
+public class Test01_12_7 {
     @Test
     public void test() {
         // Generate an initially empty hand
         Hand myHand = new Hand(new Hid(Seat.YOU));
-        
-        // Put two cards in hand: 2+10
-        Card card1 = new Card(2, Card.Suit.CLUBS);
-        Card card2 = new Card(10, Card.Suit.DIAMONDS);
-        
+
+        // Put two cards in hand: 9+8
+        Card card1 = new Card(9, Card.Suit.CLUBS);
+        Card card2 = new Card(8, Card.Suit.DIAMONDS);
+
         myHand.hit(card1);
         myHand.hit(card2);
-        
-        // Create dealer up card: 2
-        Card upCard = new Card(2, Card.Suit.HEARTS);
-        
+
+        // Create dealer up card: ACE
+        Card upCard = new Card(1, Card.Suit.HEARTS);
+
         // Construct advisor and test it.
         IAdvisor advisor = new Advisor();
-  
+
         Play advice = advisor.advise(myHand, upCard);
         // Validate the advice.
-        assertEquals(advice, Play.HIT);
+        assertEquals(advice, Play.STAY);
     }
 }
+
