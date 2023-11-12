@@ -97,10 +97,27 @@ public class BasicStrategy {
         }
         else if(hand.getValue() >= 12)
             return doSection1(hand,upCard);
-        
+
         return Play.NONE;
     }
-    
+
+    protected boolean isValid(Hand hand, Card upCard) {
+        return isValidHand(hand) && isValidCard(upCard);
+    }
+
+    // Check for invalid cases involving the hand
+    protected boolean isValidHand(Hand hand) {
+        if (hand == null || hand.size() == 0 || hand.size() > 2 || hand.size() < 2 || hand.isBlackjack()) {
+            return false;
+        }
+        return true;
+    }
+
+    // Check for invalid cases involving the dealer's upCard
+    protected boolean isValidCard(Card upCard) {
+        return upCard != null && upCard.value() >= 0;
+    }
+
     /**
      * Does section 1 processing of the basic strategy, 12-21 (player) vs. 2-A (dealer)
      * @param hand Player's hand
@@ -180,7 +197,12 @@ public class BasicStrategy {
      * @param upCard Dealer's up-card
      */
     protected Play doSection3(Hand hand, Card upCard) {
-        Card nonAceCard = hand.getCard(0).getRank() == Card.ACE ? hand.getCard(1) : hand.getCard(0);
+        Card nonAceCard;
+        if (hand.getCard(0).getRank() == Card.ACE) {
+            nonAceCard = hand.getCard(1);
+        } else {
+            nonAceCard = hand.getCard(0);
+        }
         int nonAceRank = nonAceCard.getRank();
 
         // Calculate rowIndex for non-Ace card. "A,10" is at index 0 and "A,2" is at index 8.
@@ -197,11 +219,14 @@ public class BasicStrategy {
         // Determine column index based on dealer's up-card
         int colIndex;
         if (upCard.isFace()) {
-            colIndex = 8; // Face cards (J, Q, K) are treated as 10
+            // Face cards (J, Q, K) are treated as 10
+            colIndex = 8;
         } else if (upCard.isAce()) {
-            colIndex = 9; // Ace is in the last column
+            // Ace is in the last column
+            colIndex = 9;
         } else {
-            colIndex = upCard.getRank() - 2; // For numerical cards
+            // For numerical cards
+            colIndex = upCard.getRank() - 2;
         }
 
         // Bounds check for column index
@@ -224,9 +249,11 @@ public class BasicStrategy {
         // Determine the row index. The array starts with "10,10" at index 0 and ends with "A,A" at index 9.
         int rowIndex;
         if (pairCardRank == Card.ACE) {
-            rowIndex = 9; // "A,A" is at the last index (9).
+            // "A,A" is at the last index (9).
+            rowIndex = 9;
         } else {
-            rowIndex = 10 - pairCardRank; // Other pairs follow in descending order.
+            // Other pairs follow in descending order.
+            rowIndex = 10 - pairCardRank;
         }
 
         // Bounds check for row index
@@ -239,11 +266,14 @@ public class BasicStrategy {
         // Determine column index based on dealer's up-card
         int colIndex;
         if (upCard.isFace()) {
-            colIndex = 8; // Face cards (J, Q, K) are treated as 10.
+            // Face cards (J, Q, K) are treated as 10.
+            colIndex = 8;
         } else if (upCard.isAce()) {
-            colIndex = 9; // Ace is in the last column.
+            // Ace is in the last column.
+            colIndex = 9;
         } else {
-            colIndex = upCard.getRank() - 2; // For numerical cards.
+            // For numerical cards.
+            colIndex = upCard.getRank() - 2;
         }
 
         // Bounds check for column index
@@ -254,7 +284,4 @@ public class BasicStrategy {
         return row[colIndex];
     }
 
-    protected boolean isValid(Hand hand,Card upCard) {
-        return true;
-    }
 }
