@@ -107,7 +107,7 @@ public class BasicStrategy {
 
     // Check for invalid cases involving the hand
     protected boolean isValidHand(Hand hand) {
-        if (hand == null || hand.size() == 0 || hand.size() > 2 || hand.size() < 2 || hand.isBlackjack()) {
+        if (hand == null || hand.size() == 0 || hand.size() < 2 || hand.isBlackjack()) {
             return false;
         }
         return true;
